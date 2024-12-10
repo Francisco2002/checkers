@@ -22,6 +22,10 @@
             justify-content: center;
         }
 
+        .selected {
+            background-color: #DB504A !important;
+        }
+
         #board {
             padding: 10px;
             border-radius: 10px;
@@ -74,6 +78,10 @@
         const DARK = 2;
         const EMPTY = 0;
 
+        let currentPlaying = LIGHT;
+        let selectedPiece = null;
+        let selectedPosition = null;
+
         const board = [
             [LIGHT,EMPTY,LIGHT,EMPTY,LIGHT,EMPTY,LIGHT,EMPTY],
             [EMPTY,LIGHT,EMPTY,LIGHT,EMPTY,LIGHT,EMPTY,LIGHT],
@@ -95,7 +103,30 @@
     <script>
         const boardElement = document.getElementById("board");
         
-        function redrawBoard() {
+        // verify if the game is finished
+        function isGameEnd() {
+            let countLight = 0;
+            let countDark = 0;
+
+            let i, j;
+            for(i = 0; i < 8; i++) {
+                for(j = 0; j < 8; j++) {
+                    const e = board[i][j];
+
+                    if(e == LIGHT) countLight++;
+                    if(e == DARK) countDark++;
+                }
+            }
+
+            if(countLight > 0 && countDark > 0) return { finish: false, winner: null };
+
+            const winner = countLight == 0 ? DARK : LIGHT;
+
+            return { finish: true, winner };
+        }
+
+        // draw the game board
+        function drawBoard() {
             clearCurrentBoard();
             for(let i = 0; i < 8; i++) {
                 const rowElement = document.createElement("div");
@@ -105,11 +136,13 @@
                     const data = document.createElement("div");
                     const colorData = (i + j) % 2 ? "light" : "dark"; 
                     data.className = `data ${colorData}`;
+                    data.onclick = () => handleMoviment(i, j);
 
                     const boardPiece = board[i][j];
                     if (boardPiece != EMPTY) {
                         const dataContent = document.createElement("div");
-                        dataContent.className = boardPiece == DARK ? "dark-piece" : "light-piece";
+                        const colorClass = boardPiece == DARK ? "dark-piece" : "light-piece";
+                        dataContent.classList.add(`x-${j}`, `y-${i}`, colorClass);
 
                         data.appendChild(dataContent);
                     }
@@ -121,11 +154,54 @@
         }
 
         function clearCurrentBoard() {
-            const rows = document.getElementsByClassName("row");
-            Array.prototype.map.call(rows, row => boardElement.removeChild(row));
+            const rows = document.querySelectorAll(".row");
+            rows.forEach(row => row.remove());
         }
 
-        redrawBoard();
+        function handleMoviment(i, j) {
+            const e = board[i][j];
+
+            if((e != EMPTY && e == currentPlaying))
+                selectPiece(i, j);
+            else if(selectedPiece) movePiece(i, j);
+        }
+
+        function selectPiece(i, j) {
+            const boardPiece = board[i][j];
+
+            if(boardPiece == currentPlaying) {
+                selectedPiece = [i, j];
+                const previousSelected = document.getElementsByClassName("selected");
+                if(previousSelected.length > 0)
+                    previousSelected[0].classList.remove("selected");
+                document.getElementsByClassName(`x-${j} y-${i}`)[0].classList.add("selected");
+            }
+        }
+
+        function movePiece(i, j) {
+            const iPossibles = [selectedPiece[0] - 1, selectedPiece[0] + 1];
+            const jPossibles = [selectedPiece[1] - 1, selectedPiece[1] + 1];
+            const freePosition = board[i][j] == EMPTY;
+
+            if(freePosition && iPossibles.includes(i) && jPossibles.includes(j)) {
+                const previous_i = selectedPiece[0];
+                const previous_j = selectedPiece[1];
+                board[i][j] = currentPlaying;
+                board[previous_i][previous_j] = EMPTY;
+                clearCurrentBoard();
+                drawBoard();
+        }
+        }
+
+        drawBoard();
+
+        /*
+            Until have only one kind of piece in board
+                1 - select a piece
+                2 - select the destiny position
+                3 - redraw board
+                4 - opponent's turn
+        */
     </script>
 </body>
 </html>
