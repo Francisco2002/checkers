@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket Chat</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            border: none;
+            font-family: "Poppins";
+        }
+
+        .container {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #board {
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #57737A;
+
+            & .row {
+                display: flex;
+                flex-direction: row;
+
+                & .data {
+                    width: 50px;
+                    height: 50px;
+                    border: 1px solid #57737A;
+                    border-radius: 5px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 5px;
+
+                    &.light {
+                        background-color: #DFE0E2;
+                    }
+
+                    &.dark {
+                        background-color: #071013;
+                    }
+                    
+                    div {
+                        width: 30px;
+                        height: 30px;
+                        border: 2px solid;
+                        border-radius: 50%;
+                    }
+
+                    & .dark-piece {
+                        background-color: #071013;
+                        border-color: #DFE0E2;
+                    }
+
+                    & .light-piece {
+                        background-color: #DFE0E2;
+                        border-color: #878787;
+                    }
+                }
+            }
+        }
+    </style>
+    <script>
+        const LIGHT = 1;
+        const DARK = 2;
+        const EMPTY = 0;
+
+        const board = [
+            [LIGHT,EMPTY,LIGHT,EMPTY,LIGHT,EMPTY,LIGHT,EMPTY],
+            [EMPTY,LIGHT,EMPTY,LIGHT,EMPTY,LIGHT,EMPTY,LIGHT],
+            [LIGHT,EMPTY,LIGHT,EMPTY,LIGHT,EMPTY,LIGHT,EMPTY],
+            [EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY],
+            [EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY,EMPTY],
+            [EMPTY,DARK,EMPTY,DARK,EMPTY,DARK,EMPTY,DARK],
+            [DARK,EMPTY,DARK,EMPTY,DARK,EMPTY,DARK,EMPTY],
+            [EMPTY,DARK,EMPTY,DARK,EMPTY,DARK,EMPTY,DARK],
+        ];
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div id="board"></div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <script>
+        const boardElement = document.getElementById("board");
+        
+        function redrawBoard() {
+            clearCurrentBoard();
+            for(let i = 0; i < 8; i++) {
+                const rowElement = document.createElement("div");
+                rowElement.className = "row";
+
+                for(let j = 0; j < 8; j++) {
+                    const data = document.createElement("div");
+                    const colorData = (i + j) % 2 ? "light" : "dark"; 
+                    data.className = `data ${colorData}`;
+
+                    const boardPiece = board[i][j];
+                    if (boardPiece != EMPTY) {
+                        const dataContent = document.createElement("div");
+                        dataContent.className = boardPiece == DARK ? "dark-piece" : "light-piece";
+
+                        data.appendChild(dataContent);
+                    }
+                    rowElement.appendChild(data);
+                }
+
+                boardElement.appendChild(rowElement);
+            }
+        }
+
+        function clearCurrentBoard() {
+            const rows = document.getElementsByClassName("row");
+            Array.prototype.map.call(rows, row => boardElement.removeChild(row));
+        }
+
+        redrawBoard();
+    </script>
+</body>
+</html>
