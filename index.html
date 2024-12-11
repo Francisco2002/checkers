@@ -18,6 +18,7 @@
         .container {
             height: 100vh;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
@@ -96,6 +97,9 @@
 </head>
 <body>
     <div class="container">
+        <header>
+            Jogando atualmente: <span id="current-player"></span>
+        </header>
         <div id="board"></div>
     </div>
 
@@ -128,6 +132,9 @@
         // draw the game board
         function drawBoard() {
             clearCurrentBoard();
+            const currentPlayerElement = document.getElementById("current-player");
+            currentPlayerElement.innerText = currentPlaying == DARK ? "Pretas" : "Brancas"
+
             for(let i = 0; i < 8; i++) {
                 const rowElement = document.createElement("div");
                 rowElement.className = "row";
@@ -188,7 +195,7 @@
                 const previous_j = selectedPiece[1];
                 board[i][j] = currentPlaying;
                 board[previous_i][previous_j] = EMPTY;
-                clearCurrentBoard();
+                currentPlaying = currentPlaying == DARK ? LIGHT : DARK;
                 drawBoard();
         }
         }
