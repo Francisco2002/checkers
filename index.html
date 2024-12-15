@@ -185,17 +185,49 @@
             }
         }
 
+        function canCatchOpponentsPiece(i_destiny, j_destiny) {
+            const i_catch = Math.floor((selectedPiece[0] + i_destiny) / 2);
+            const j_catch = Math.floor((selectedPiece[1] + j_destiny) / 2);
+
+            const catchPiece = board[i_catch][j_catch];
+            
+            return (
+                (currentPlaying == LIGHT && catchPiece == DARK)
+                || (currentPlaying == DARK && catchPiece == LIGHT)
+            );
+        }
+
         function movePiece(i, j) {
-            const iPossibles = [selectedPiece[0] - 1, selectedPiece[0] + 1];
+            const iPossibles = currentPlaying == LIGHT ? [selectedPiece[0] + 1] : [selectedPiece[0] - 1];
             const jPossibles = [selectedPiece[1] - 1, selectedPiece[1] + 1];
             const freePosition = board[i][j] == EMPTY;
 
-            if(freePosition && iPossibles.includes(i) && jPossibles.includes(j)) {
+            const canCatch = canCatchOpponentsPiece(i, j);
+
+            if(
+                freePosition
+                && (
+                    (iPossibles.includes(i) && jPossibles.includes(j))
+                    || canCatch
+                )
+            ) {
                 const previous_i = selectedPiece[0];
                 const previous_j = selectedPiece[1];
+
+                console.log(`Movendo ${currentPlaying == LIGHT ? "BRANCA" : "PRETA"} de (${previous_i}, ${previous_j}) para (${i}, ${j})`);
+
                 board[i][j] = currentPlaying;
                 board[previous_i][previous_j] = EMPTY;
                 currentPlaying = currentPlaying == DARK ? LIGHT : DARK;
+
+                if (canCatch) {
+                    const i_catch = Math.floor((previous_i + i) / 2);
+                    const j_catch = Math.floor((previous_j + j) / 2);
+
+                    console.log(`CAPTURANDO PEÇA EM (${i_catch},${j_catch})`);
+                    board[i_catch][j_catch] = EMPTY;
+                }
+
                 drawBoard();
         }
         }
@@ -204,10 +236,10 @@
 
         /*
             Until have only one kind of piece in board
-                1 - select a piece
-                2 - select the destiny position
-                3 - redraw board
-                4 - opponent's turn
+                1 - select a piece (x)
+                2 - select the destiny position (x)
+                3 - redraw board (x)
+                4 - opponent's turn (x)
         */
     </script>
 </body>
